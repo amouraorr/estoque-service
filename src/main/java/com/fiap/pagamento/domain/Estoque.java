@@ -1,4 +1,4 @@
-package com.fiap.cliente.domain;
+package com.fiap.pagamento.domain;
 
 import lombok.*;
 
@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Estoque {
+
     private Long id;
     private String sku;
     private Integer quantidadeDisponivel;

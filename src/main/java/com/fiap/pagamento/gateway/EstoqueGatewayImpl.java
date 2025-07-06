@@ -1,9 +1,9 @@
-package com.fiap.cliente.gateway;
+package com.fiap.pagamento.gateway;
 
-import com.fiap.cliente.domain.Estoque;
-import com.fiap.cliente.entity.EstoqueEntity;
-import com.fiap.cliente.mapper.EstoqueMapper;
-import com.fiap.cliente.repository.EstoqueRepository;
+import com.fiap.pagamento.domain.Estoque;
+import com.fiap.pagamento.entity.EstoqueEntity;
+import com.fiap.pagamento.mapper.EstoqueMapper;
+import com.fiap.pagamento.repository.EstoqueRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -43,4 +43,6 @@ public class EstoqueGatewayImpl implements EstoqueGateway {
         entity.setQuantidadeDisponivel(entity.getQuantidadeDisponivel() - quantidade);
         return mapper.toDomain(repository.save(entity));
     }
+
+    // Caso futuramente precise consumir eventos do Kafka, adicionar aqui métodos para processar eventos recebidos.
 }

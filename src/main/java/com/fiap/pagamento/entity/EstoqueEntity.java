@@ -1,4 +1,4 @@
-package com.fiap.cliente.entity;
+package com.fiap.pagamento.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
