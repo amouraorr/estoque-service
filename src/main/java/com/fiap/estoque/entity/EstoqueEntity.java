@@ -3,7 +3,6 @@ package com.fiap.estoque.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 @Data
 @Builder
 @NoArgsConstructor

@@ -1,5 +1,6 @@
 package com.fiap.estoque.controller;
 
+import com.fiap.estoque.domain.Estoque;
 import com.fiap.estoque.dto.request.EstoqueRequestDTO;
 import com.fiap.estoque.dto.response.EstoqueResponseDTO;
 import com.fiap.estoque.mapper.EstoqueMapper;
@@ -7,8 +8,12 @@ import com.fiap.estoque.usecase.service.AtualizarEstoqueServiceUseCase;
 import com.fiap.estoque.usecase.service.BaixarEstoqueServiceUseCase;
 import com.fiap.estoque.usecase.service.ConsultarEstoqueServiceUseCase;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
+@Slf4j
 @RestController
 @RequestMapping("/estoques")
 @RequiredArgsConstructor
@@ -19,30 +24,32 @@ public class EstoqueController {
     private final BaixarEstoqueServiceUseCase baixarUseCase;
     private final EstoqueMapper mapper;
 
-    // Endpoint para consultar estoque por SKU
     @GetMapping("/{sku}")
     public EstoqueResponseDTO consultar(@PathVariable String sku) {
-        return consultarUseCase.execute(sku)
-                .map(mapper::toResponseDTO)
-                .orElseThrow(() -> new RuntimeException("Estoque não encontrado"));
+        log.info("Consultando estoque para SKU: {}", sku);
+        Optional<Estoque> estoqueOpt = consultarUseCase.execute(sku);
+        Estoque estoque = estoqueOpt.orElseThrow(() -> {
+            log.warn("Estoque não encontrado para SKU: {}", sku);
+            return new RuntimeException("Estoque não encontrado para SKU: " + sku);
+        });
+        log.info("Estoque encontrado para SKU: {}, quantidade: {}", sku, estoque.getQuantidadeDisponivel());
+        return mapper.toResponseDTO(estoque);
     }
 
-    // Endpoint para atualizar estoque
     @PutMapping
     public EstoqueResponseDTO atualizar(@RequestBody EstoqueRequestDTO dto) {
+        log.info("Atualizando estoque para SKU: {}", dto.getSku());
         var estoque = mapper.toDomain(dto);
-        return mapper.toResponseDTO(atualizarUseCase.execute(estoque));
+        Estoque atualizado = atualizarUseCase.execute(estoque);
+        log.info("Estoque atualizado para SKU: {}, nova quantidade: {}", atualizado.getSku(), atualizado.getQuantidadeDisponivel());
+        return mapper.toResponseDTO(atualizado);
     }
 
-    // Endpoint para baixar (reduzir) estoque de um SKU
     @PostMapping("/{sku}/baixa")
     public EstoqueResponseDTO baixar(@PathVariable String sku, @RequestParam int quantidade) {
-        return mapper.toResponseDTO(baixarUseCase.execute(sku, quantidade));
+        log.info("Baixando estoque para SKU: {}, quantidade: {}", sku, quantidade);
+        Estoque atualizado = baixarUseCase.execute(sku, quantidade);
+        log.info("Estoque após baixa para SKU: {}, quantidade disponível: {}", sku, atualizado.getQuantidadeDisponivel());
+        return mapper.toResponseDTO(atualizado);
     }
-
-    // Para futura integração com Kafka:
-    // @KafkaListener(topics = "nome-do-topico", groupId = "estoque-service")
-    // public void listen(String message) {
-    //     // Processar mensagem recebida do Kafka
-    // }
 }
